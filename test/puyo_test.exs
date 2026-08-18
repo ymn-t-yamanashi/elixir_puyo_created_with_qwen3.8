@@ -13,7 +13,9 @@ defmodule Puyopuyo.PuyoTest do
       assert is_atom(color) or match?({:rgb, _, _, _}, color)
     end
 
-    assert Puyo.color(:red) == :red
+    assert Puyo.color(:red) == {:rgb, 230, 60, 60}
+    assert Puyo.color(:green) == {:rgb, 60, 200, 60}
+    assert Puyo.color(:blue) == {:rgb, 60, 90, 230}
     assert Puyo.color(:yellow) == {:rgb, 255, 220, 0}
   end
 

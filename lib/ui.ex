@@ -102,23 +102,42 @@ defmodule Puyopuyo.UI do
   defp draw_all(terminal, state) do
     {tw, th} = safe_terminal_size()
 
+    # 右パネル: 上寄せで最小 24 行ターミナルに収まるよう配置する。
+    # 各ブロックは「内容行 + 枠 2 行」: NEXT=6+2=8 / ステータス=5+2=7 /
+    # 操作=6+2=8。合計 23 行 + 空き 1 行 = 24 行ちょうど。
+    #（従来は操作パネルが y:22 h:12 で 33 行目まで伸び、24 行ターミナルに
+    #  はみ出して「画面がずれる」原因となっていた）
+    next_rect = %Rect{x: 12, y: 0, width: 16, height: 8}
+    stats_rect = %Rect{x: 12, y: 9, width: 16, height: 7}
+    help_rect = %Rect{x: 12, y: 16, width: 16, height: 8}
+
     widgets = [
       {%Clear{}, %Rect{x: 0, y: 0, width: tw, height: th}},
-      {board_paragraph(state), %Rect{x: 0, y: 0, width: 10, height: 20}},
-      {next_paragraph(state), %Rect{x: 12, y: 0, width: 16, height: 12}},
-      {stats_paragraph(state), %Rect{x: 12, y: 13, width: 16, height: 9}},
-      {help_paragraph(), %Rect{x: 12, y: 22, width: 16, height: 12}}
+      {board_paragraph(state), fit(%Rect{x: 0, y: 0, width: 10, height: 20}, th)},
+      {next_paragraph(state), fit(next_rect, th)},
+      {stats_paragraph(state), fit(stats_rect, th)},
+      {help_paragraph(), fit(help_rect, th)}
     ]
 
     widgets =
       if Game.over?(state) do
         widgets ++
-          [{game_over_paragraph(), %Rect{x: 1, y: 6, width: 8, height: 10}}]
+          [{game_over_paragraph(), fit(%Rect{x: 1, y: 6, width: 8, height: 10}, th)}]
       else
         widgets
       end
 
     ExRatatui.draw(terminal, widgets)
+  end
+
+  # 矩形がターミナルの高さ(th)を超えないよう保つ。
+  # 下はみ出し場合は上へずらす（画面がずれるのを防ぐ）
+  defp fit(rect, th) do
+    if rect.y + rect.height <= th do
+      rect
+    else
+      %{rect | y: max(0, th - rect.height)}
+    end
   end
 
   # ターミナルサイズが取得できない(0,0)場合はデフォルト値を使う
