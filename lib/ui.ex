@@ -136,17 +136,13 @@ defmodule Puyopuyo.UI do
         spans =
           Enum.map(row, fn
             {nil, _} ->
-              Span.new(@empty <> @empty)
+              Span.new(@empty)
 
             {type, :ghost} ->
-              Span.new(@ghost <> @ghost,
-                style: %Style{fg: Puyo.color(type), modifiers: [:dim]}
-              )
+              Span.new(@ghost, style: %Style{fg: Puyo.color(type), modifiers: [:dim]})
 
             {type, _} ->
-              Span.new(@cell <> @cell,
-                style: %Style{fg: Puyo.color(type), bg: :black}
-              )
+              Span.new(@cell, style: %Style{fg: Puyo.color(type), bg: :black})
           end)
 
         Line.new(spans)
@@ -238,7 +234,7 @@ defmodule Puyopuyo.UI do
   end
 
   defp span_puyo(type),
-    do: Span.new(@cell <> @cell, style: %Style{fg: Puyo.color(type), bg: :black})
+    do: Span.new(@cell, style: %Style{fg: Puyo.color(type), bg: :black})
 
   # スコア / 最長連鎖 / 総消去数
   defp stats_paragraph(state) do
