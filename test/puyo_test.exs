@@ -10,13 +10,13 @@ defmodule Puyopuyo.PuyoTest do
   test "color/1 は各タイプに対して表示色を返す" do
     for type <- Puyo.types() do
       color = Puyo.color(type)
-      assert is_atom(color) or match?({:rgb, _, _, _}, color)
+      assert is_atom(color) or match?({:rgb, _, _, _}, color) or match?({:indexed, _}, color)
     end
 
-    assert Puyo.color(:red) == {:rgb, 230, 60, 60}
-    assert Puyo.color(:green) == {:rgb, 60, 200, 60}
-    assert Puyo.color(:blue) == {:rgb, 60, 90, 230}
-    assert Puyo.color(:yellow) == {:rgb, 255, 220, 0}
+    assert Puyo.color(:red) == {:indexed, 196}
+    assert Puyo.color(:green) == {:indexed, 46}
+    assert Puyo.color(:blue) == {:indexed, 33}
+    assert Puyo.color(:yellow) == {:indexed, 226}
   end
 
   test "color/1 は未知タイプでもエラーにならずデフォルトを返す" do

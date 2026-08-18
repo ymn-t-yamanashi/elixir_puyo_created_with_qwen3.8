@@ -7,14 +7,17 @@ defmodule Puyopuyo.Puyo do
 
   @types [:red, :green, :blue, :yellow]
 
-  # ターミナルの16/256色パレットに依存しないよう、4色とも显式な RGB を使う。
-  # 名前付きアトム（:red など）は端末のカラーリング次第で区別がつかず
-  # 「2色しか見えていないように見える」問題を防ぐ。
+  # 表示色は xterm 256 色パレット（`{:indexed, n}`）で固定する。
+  # - truecolor（`{:rgb, r, g, b}`）は非対応の端末では無視・デフォルト色に
+  #   なり「全ぷよが同じ色に見える」問題が起きる
+  # - 名前付きアトム（:red 等）は端末の 16 色パレット依存で区別がつかない
+  # 256 色は `xterm-256color` ならほぼ全端末で共通して使える。
+  # 196=鮮烈な赤 / 46=鮮烈な緑 / 33=鮮烈な青 / 226=明るい黄
   @colors %{
-    red: {:rgb, 230, 60, 60},
-    green: {:rgb, 60, 200, 60},
-    blue: {:rgb, 60, 90, 230},
-    yellow: {:rgb, 255, 220, 0}
+    red: {:indexed, 196},
+    green: {:indexed, 46},
+    blue: {:indexed, 33},
+    yellow: {:indexed, 226}
   }
 
   @doc "存在する全ぷよの色タイプ"
@@ -24,7 +27,7 @@ defmodule Puyopuyo.Puyo do
   ぷよタイプに対応する表示色。
 
   iex> Puyopuyo.Puyo.color(:red)
-  {:rgb, 230, 60, 60}
+  {:indexed, 196}
   """
   def color(type), do: Map.get(@colors, type, :white)
 
