@@ -15,11 +15,11 @@
 ## 使い方
 
 ```sh
-mix deps.get      # 依存を取得・ビルド
-mix run -e "Puyopuyo.play()"
+mix deps.get   # 依存を取得・ビルド
+mix puyopuyo   # プレイ開始
 ```
 
-または IEx から:
+または `mix run -e "Puyopuyo.play()"`、または IEx から:
 
 ```sh
 iex -S mix
@@ -29,7 +29,7 @@ Puyopuyo.play()
 > 注: 起動前に stdin がインタラクティブな TTY かを確認します。パイプ / CI / nohup などの非対話コンテキストでは警告が出て終了します。特殊な環境で強行したい場合は `PUYO_SKIP_TTY_CHECK=1` でチェックをスキップできます:
 >
 > ```sh
-> PUYO_SKIP_TTY_CHECK=1 mix run -e "Puyopuyo.play()"
+> PUYO_SKIP_TTY_CHECK=1 mix puyopuyo
 > ```
 
 ## 操作
@@ -59,7 +59,7 @@ Puyopuyo.play()
 mix test
 ```
 
-ゲームロジック（`lib/game.ex` / `lib/board.ex`）と UI 周りをテストでカバーしています（7 doctests / 54 tests）。テストの意図と設計は [テスト仕様.md](テスト仕様.md) を参照。
+ゲームロジック（`lib/game.ex` / `lib/board.ex`）と UI 周りをテストでカバーしています（7 doctests / 55 tests）。テストの意図と設計は [テスト仕様.md](テスト仕様.md) を参照。
 
 ## ドキュメント
 
@@ -80,5 +80,6 @@ lib/
   puyo.ex       # ぷよの型と色の対応
   ui.ex         # ex_ratatui での描画とゲームループ
   application.ex# スーパービジョン
+  mix/tasks/puyopuyo.ex  # mix puyopuyo タスク
 test/           # ExUnit テスト
 ```

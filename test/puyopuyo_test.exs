@@ -5,5 +5,10 @@ defmodule PuyopuyoTest do
     assert function_exported?(Puyopuyo, :play, 0)
   end
 
+  test "mix puyopuyo タスクが定義されている" do
+    assert Code.ensure_loaded?(Mix.Tasks.Puyopuyo)
+    assert function_exported?(Mix.Tasks.Puyopuyo, :run, 1)
+  end
+
   doctest Puyopuyo
 end
