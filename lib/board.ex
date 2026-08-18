@@ -75,8 +75,10 @@ defmodule Puyopuyo.Board do
   重力で落下させる（列ごとに独立して最下部に詰める）。
 
   iex> b = Puyopuyo.Board.set(Puyopuyo.Board.new(), 0, 0, :blue)
-  iex> Puyopuyo.Board.set(Puyopuyo.Board.settle(b), 11, 0, :blue)
+  iex> Puyopuyo.Board.settle(b) |> Puyopuyo.Board.at(11, 0)
   :blue
+  iex> Puyopuyo.Board.settle(b) |> Puyopuyo.Board.at(0, 0)
+  nil
   """
   def settle(board) do
     Enum.reduce(0..(@width - 1), board, fn col, board ->
@@ -86,8 +88,10 @@ defmodule Puyopuyo.Board do
             not is_nil(v),
             do: v
 
-      Enum.reduce(0..length(stack) - 1, board, fn i, acc ->
-        set(acc, @height - 1 - i, col, Enum.at(stack, i))
+      cleared = Enum.reduce(0..(@height - 1), board, fn row, acc -> set(acc, row, col, nil) end)
+
+      Enum.reduce(Enum.with_index(stack), cleared, fn {v, i}, acc ->
+        set(acc, @height - 1 - i, col, v)
       end)
     end)
   end
@@ -95,8 +99,7 @@ defmodule Puyopuyo.Board do
   @doc """
   同じ色の直交連結（上下左右、BFS）による連結成分のリストを返す。
 
-  iex> b = Puyopuyo.Board.new()
-  ...>      |> Enum.reduce(8..11, fn r, acc -> Puyopuyo.Board.set(acc, r, 0, :red) end)
+  iex> b = Enum.reduce(8..11, Puyopuyo.Board.new(), fn r, acc -> Puyopuyo.Board.set(acc, r, 0, :red) end)
   iex> b |> Puyopuyo.Board.connected_components() |> Enum.map(&length/1)
   [4]
   """
@@ -149,8 +152,7 @@ defmodule Puyopuyo.Board do
 
   戻り値は `{新しい盤面, 消したぷよ数}`。
 
-  iex> b = Puyopuyo.Board.new()
-  ...>      |> Enum.reduce(8..11, fn r, acc -> Puyopuyo.Board.set(acc, r, 0, :red) end)
+  iex> b = Enum.reduce(8..11, Puyopuyo.Board.new(), fn r, acc -> Puyopuyo.Board.set(acc, r, 0, :red) end)
   iex> {b2, n} = Puyopuyo.Board.clear_groups(b)
   iex> {n, Puyopuyo.Board.at(b2, 8, 0), Puyopuyo.Board.at(b2, 11, 0)}
   {4, nil, nil}
