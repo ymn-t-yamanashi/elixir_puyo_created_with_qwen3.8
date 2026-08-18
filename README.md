@@ -1,21 +1,84 @@
-# Puyopuyo
+# ぷよぷよ（Elixir + ex_ratatui 版）
 
-**TODO: Add description**
+ターミナルで動く 1 人用ぷよぷよ風ゲーム。Elixir で実装し、ターミナル UI は [ex_ratatui](https://github.com/mcass19/ex_ratatui)（Rust の ratatui への Elixir バインディング）を使っています。
 
-## Installation
+- 相手（AI）なしの**スコアアタック型**
+- 盤面: **2 列 × 12 行**、4 色（赤・緑・青・黄）のペア（同色 2 個を縦に積んだもの）が落下
+- 同色 4 つ以上が上下左右で連結すると消え、落下で連鎖（チェーン）が発生する
+- バッグ乱数（4 色 1 組）で次のペアの偏りを抑え、NEXT に次の 3 ペアを表示
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `puyopuyo` to your list of dependencies in `mix.exs`:
+## 必要環境
 
-```elixir
-def deps do
-  [
-    {:puyopuyo, "~> 0.1.0"}
-  ]
-end
+- Elixir `~> 1.19`（Erlang/OTP）
+- Rust ツールチェーン（`ex_ratatui` の NIF をビルドするため）
+
+## 使い方
+
+```sh
+mix deps.get      # 依存を取得・ビルド
+mix run -e "Puyopuyo.play()"
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/puyopuyo>.
+または IEx から:
 
+```sh
+iex -S mix
+Puyopuyo.play()
+```
+
+> 注: 起動前に stdin がインタラクティブな TTY かを確認します。パイプ / CI / nohup などの非対話コンテキストでは警告が出て終了します。特殊な環境で強行したい場合は `PUYO_SKIP_TTY_CHECK=1` でチェックをスキップできます:
+>
+> ```sh
+> PUYO_SKIP_TTY_CHECK=1 mix run -e "Puyopuyo.play()"
+> ```
+
+## 操作
+
+| キー | 動作 | 備考 |
+| --- | --- | --- |
+| `←` / `a` | 左移動 | 1 列ずつ |
+| `→` / `d` | 右移動 | 1 列ずつ |
+| `↓` / `s` | ソフトドロップ | 1 段下げる（+1 点/段） |
+| `Space` | ハードドロップ | 最下部まで落下・固定（+2 点/段） |
+| `r` | リスタート | ゲームオーバー時でも有効 |
+| `q` | 終了 | いつでも有効 |
+
+## ルール（要点）
+
+- **重力**: 800ms ごとに 1 段自動落下
+- **消去**: 同色 4 つ以上が上下左右（直交）で連結したグループがまとめて消える
+- **連鎖**: 消去 → 列ごとの落下 → 消去 … を繰り返し、連鎖数に応じて得点が伸びる
+- **得点**: `消した数 × 10`（10 個以上で ×2）× 連鎖数
+- **ゲームオーバー**: 上段のどちらの列にもペアが出現できないとき
+
+詳細は [ルール.md](ルール.md) を参照してください。実物との違いの比較表もそちらにあります。
+
+## テスト
+
+```sh
+mix test
+```
+
+ゲームロジック（`lib/game.ex` / `lib/board.ex`）と UI 周りをテストでカバーしています（7 doctests / 54 tests）。テストの意図と設計は [テスト仕様.md](テスト仕様.md) を参照。
+
+## ドキュメント
+
+| ファイル | 内容 |
+| --- | --- |
+| [ルール.md](ルール.md) | 実装ルールのまとめ・実物との比較 |
+| [仕様.md](仕様.md) | 技術的な実装仕様 |
+| [テスト仕様.md](テスト仕様.md) | テストの設計・カバー範囲 |
+| [調査結果.md](調査結果.md) | 検証結果の記録 |
+
+## プロジェクト構成
+
+```
+lib/
+  puyopuyo.ex   # エントリポイント（play/0、TTY 事前チェック）
+  game.ex       # ゲーム状態・重力・移動・ドロップ・スコア・連鎖
+  board.ex      # 盤面（2×12）・落下（settle）・消去判定・連結判定
+  puyo.ex       # ぷよの型と色の対応
+  ui.ex         # ex_ratatui での描画とゲームループ
+  application.ex# スーパービジョン
+test/           # ExUnit テスト
+```
