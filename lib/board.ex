@@ -83,7 +83,7 @@ defmodule Puyopuyo.Board do
   def settle(board) do
     Enum.reduce(0..(@width - 1), board, fn col, board ->
       stack =
-        for row <- (@height - 1)..0,
+        for row <- (@height - 1)..0//-1,
             v = at(board, row, col),
             not is_nil(v),
             do: v
